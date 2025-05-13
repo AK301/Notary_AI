@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Partnership Deed Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px auto;
+      max-width: 600px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      background-color: #f9f9f9;
+    }
+    h2 {
+      text-align: center;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0 12px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 6px;
+    }
+    #download-link {
+      display: none;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Partnership Deed Generator</h2>
+
+  <form id="deedForm">
+    <label>Firm Name:</label>
+    <input type="text" name="firm_name" required>
+
+    <label>Partners (comma-separated):</label>
+    <input type="text" name="partners" required>
+
+    <label>Business Type:</label>
+    <input type="text" name="business_type" required>
+
+    <label>Capital Contributions:</label>
+    <input type="text" name="capital" required>
+
+    <label>Profit Sharing Ratio:</label>
+    <input type="text" name="profit_ratio" required>
+
+    <label>Start Date:</label>
+    <input type="text" name="start_date" required>
+
+    <label>Duration:</label>
+    <input type="text" name="duration" required>
+
+    <label>Duties:</label>
+    <textarea name="duties" required></textarea>
+
+    <label>Jurisdiction:</label>
+    <input type="text" name="jurisdiction" required>
+
+    <label>Dispute Clause:</label>
+    <textarea name="dispute_clause" required></textarea>
+
+    <button type="submit">Generate Deed</button>
+  </form>
+
+  <p id="status"></p>
+  <a id="download-link" href="#" target="_blank">📥 Download Your PDF</a>
+
+  <script>
+    const form = document.getElementById('deedForm');
+    const downloadLink = document.getElementById('download-link');
+    const status = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.style.color = "blue";
+      status.textContent = "⏳ Generating deed...";
+
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => {
+        if (key === "partners") {
+          data[key] = value.split(",").map(p => p.trim());
+        } else {
+          data[key] = value;
+        }
+      });
+
+      console.log("📤 Sending data to backend:", data);
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/generate-deed/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        console.log("📩 Raw response:", response);
+
+        if (!response.ok) {
+          status.style.color = "red";
+          status.textContent = `❌ Server error: ${response.status}`;
+          return;
+        }
+
+        const result = await response.json();
+        console.log("✅ Response JSON:", result);
+
+        if (result.pdf_path) {
+          const filename = result.pdf_path.split("\\").pop();
+          downloadLink.href = `http://127.0.0.1:8000/download/${filename}`;
+          downloadLink.style.display = "inline-block";
+          downloadLink.textContent = "📥 Download " + filename;
+          status.style.color = "green";
+          status.textContent = "✅ Deed generated successfully!";
+        } else {
+          status.style.color = "orange";
+          status.textContent = "⚠️ No PDF path returned. Try again.";
+        }
+      } catch (err) {
+        console.error("❌ JS Fetch Error:", err);
+        status.style.color = "red";
+        status.textContent = "❌ Error: " + err.message;
+      }
+    });
+  </script>
+
+</body>
+</html>

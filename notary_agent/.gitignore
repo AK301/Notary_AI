@@ -1,0 +1,32 @@
+# Bytecode / cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+env/
+
+# IDE config
+.vscode/
+.idea/
+
+# Environment variables
+.env
+Open Ai key.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# PDF & HTML output
+generated_pdfs/*.pdf
+generated_pdfs/*.html
+
+# Compiled files
+*.log
+*.bak
+
+# Other temporary files
+*.tmp
+*.swp
