@@ -2,145 +2,218 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Partnership Deed Generator</title>
+  <title>Legal Document Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 40px auto;
-      max-width: 600px;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      background-color: #f9f9f9;
+      max-width: 700px;
+      margin: auto;
+      padding: 30px;
+      background: #f9f9f9;
     }
     h2 {
       text-align: center;
     }
-    input, textarea {
+    label {
+      font-weight: bold;
+    }
+    input, textarea, select {
       width: 100%;
+      margin-bottom: 15px;
       padding: 10px;
-      margin: 6px 0 12px;
-      border: 1px solid #aaa;
-      border-radius: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
     button {
-      padding: 10px 20px;
+      padding: 10px 25px;
       font-size: 16px;
-      cursor: pointer;
-      border: none;
       background-color: #4CAF50;
       color: white;
-      border-radius: 6px;
-    }
-    #download-link {
-      display: none;
-      margin-top: 20px;
-      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-right: 10px;
     }
     #status {
-      margin-top: 20px;
+      margin-top: 15px;
       font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <h2>Partnership Deed Generator</h2>
+  <h2>Generate Legal Document (.docx)</h2>
 
-  <form id="deedForm">
-    <label>Firm Name:</label>
-    <input type="text" name="firm_name" required>
+  <form id="documentForm">
+    <label>Select Document Type:</label>
+    <select id="docType" name="doc_type" required>
+      <option value="deed">Partnership Deed</option>
+      <option value="rent">Rent Agreement</option>
+    </select>
 
-    <label>Partners (comma-separated):</label>
-    <input type="text" name="partners" required>
+    <div id="formFields"></div>
 
-    <label>Business Type:</label>
-    <input type="text" name="business_type" required>
-
-    <label>Capital Contributions:</label>
-    <input type="text" name="capital" required>
-
-    <label>Profit Sharing Ratio:</label>
-    <input type="text" name="profit_ratio" required>
-
-    <label>Start Date:</label>
-    <input type="text" name="start_date" required>
-
-    <label>Duration:</label>
-    <input type="text" name="duration" required>
-
-    <label>Duties:</label>
-    <textarea name="duties" required></textarea>
-
-    <label>Jurisdiction:</label>
-    <input type="text" name="jurisdiction" required>
-
-    <label>Dispute Clause:</label>
-    <textarea name="dispute_clause" required></textarea>
-
-    <button type="submit">Generate Deed</button>
+    <button type="submit">Generate Document</button>
+    <button type="button" onclick="suggestClause('duties')">💬 Suggest Duties</button>
   </form>
 
   <p id="status"></p>
-  <a id="download-link" href="#" target="_blank">📥 Download Your PDF</a>
 
   <script>
-    const form = document.getElementById('deedForm');
-    const downloadLink = document.getElementById('download-link');
+    const form = document.getElementById('documentForm');
+    const formFields = document.getElementById('formFields');
     const status = document.getElementById('status');
+    const docType = document.getElementById('docType');
+
+    const templates = {
+      deed: `
+        <label>Execution Date:</label>
+        <input name="execution_date" required>
+
+        <label>Jurisdiction:</label>
+        <input name="jurisdiction" required>
+
+        <label>Firm Name:</label>
+        <input name="firm_name" required>
+
+        <label>Business Type:</label>
+        <input name="business_type" required>
+
+        <label>Start Date:</label>
+        <input name="start_date" required>
+
+        <label>Business Address:</label>
+        <input name="business_address" required>
+
+        <label>Area of Operation:</label>
+        <input name="area_of_operation" required>
+
+        <label>Capital Contribution:</label>
+        <input name="capital_contribution" required>
+
+        <label>Profit Sharing:</label>
+        <input name="profit_sharing" required>
+
+        <label>Duties:</label>
+        <textarea name="duties" id="duties" rows="4" required></textarea>
+
+        <h3>Partner 1</h3>
+        <input name="partner1.full_name" placeholder="Full Name" required>
+        <input name="partner1.father_name" placeholder="Father's Name" required>
+        <input name="partner1.age" placeholder="Age" required>
+        <input name="partner1.address" placeholder="Address" required>
+
+        <h3>Partner 2</h3>
+        <input name="partner2.full_name" placeholder="Full Name" required>
+        <input name="partner2.father_name" placeholder="Father's Name" required>
+        <input name="partner2.age" placeholder="Age" required>
+        <input name="partner2.address" placeholder="Address" required>
+      `,
+      rent: `
+        <label>Agreement Date:</label>
+        <input name="agreement_date" required>
+
+        <h3>Landlord</h3>
+        <input name="landlord.name" placeholder="Full Name" required>
+        <input name="landlord.father_name" placeholder="Father's Name" required>
+        <input name="landlord.address" placeholder="Address" required>
+
+        <h3>Tenant</h3>
+        <input name="tenant.company_name" placeholder="Company Name" required>
+        <input name="tenant.director_name" placeholder="Director Name" required>
+
+        <h3>Property</h3>
+        <input name="property.number" placeholder="Property Number" required>
+        <input name="property.address" placeholder="Full Address" required>
+
+        <h3>Rent Details</h3>
+        <input name="rent.amount" placeholder="Rent Amount" required>
+        <input name="rent.amount_words" placeholder="Rent Amount in Words" required>
+        <input name="rent.start_date" placeholder="Start Date" required>
+        <input name="rent.duration" placeholder="Duration (e.g. 11 months)" required>
+
+        <label>Duties:</label>
+        <textarea name="duties" id="duties" rows="4" required></textarea>
+
+        <label>Place:</label>
+        <input name="place" placeholder="e.g. Ratnagiri" required>
+      `
+    };
+
+    docType.addEventListener('change', () => {
+      formFields.innerHTML = templates[docType.value];
+    });
+
+    docType.dispatchEvent(new Event('change'));
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       status.style.color = "blue";
-      status.textContent = "⏳ Generating deed...";
+      status.textContent = "⏳ Generating document...";
 
       const formData = new FormData(form);
       const data = {};
-      formData.forEach((value, key) => {
-        if (key === "partners") {
-          data[key] = value.split(",").map(p => p.trim());
+
+      for (const [key, value] of formData.entries()) {
+        const keys = key.split(".");
+        if (keys.length === 2) {
+          data[keys[0]] = data[keys[0]] || {};
+          data[keys[0]][keys[1]] = value;
         } else {
           data[key] = value;
         }
-      });
+      }
 
-      console.log("📤 Sending data to backend:", data);
+      const endpoint = docType.value === "deed" ? "/generate-docx/" : "/generate-rent-agreement/";
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/generate-deed/", {
+        const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
         });
 
-        console.log("📩 Raw response:", response);
+        if (!response.ok) throw new Error("Failed to generate document");
 
-        if (!response.ok) {
-          status.style.color = "red";
-          status.textContent = `❌ Server error: ${response.status}`;
-          return;
-        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${docType.value}_document.docx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
 
-        const result = await response.json();
-        console.log("✅ Response JSON:", result);
-
-        if (result.pdf_path) {
-          const filename = result.pdf_path.split("\\").pop();
-          downloadLink.href = `http://127.0.0.1:8000/download/${filename}`;
-          downloadLink.style.display = "inline-block";
-          downloadLink.textContent = "📥 Download " + filename;
-          status.style.color = "green";
-          status.textContent = "✅ Deed generated successfully!";
-        } else {
-          status.style.color = "orange";
-          status.textContent = "⚠️ No PDF path returned. Try again.";
-        }
+        status.style.color = "green";
+        status.textContent = "✅ Document downloaded successfully!";
       } catch (err) {
-        console.error("❌ JS Fetch Error:", err);
         status.style.color = "red";
         status.textContent = "❌ Error: " + err.message;
       }
     });
+
+    async function suggestClause(fieldName) {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/suggest-clause/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ field: fieldName, context: docType.value })
+      });
+
+      const data = await response.json();
+      if (!data.suggestion) {
+        console.error("🛑 GPT returned error:", data.error);
+        alert("Failed to generate suggestion. Please check backend.");
+        return;
+      }
+
+      console.log("🧠 GPT Suggestion:", data.suggestion);
+      document.querySelector(`[name="${fieldName}"]`).value = data.suggestion;
+    } catch (err) {
+      console.error("💥 JS Fetch Error:", err);
+      alert("Something went wrong while contacting the server.");
+    }
+  }
   </script>
 
 </body>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Partnership Deed</title>
+  <style>
+    body { font-family: 'Times New Roman', serif; padding: 40px; line-height: 1.6; }
+    h1, h2 { text-align: center; text-transform: uppercase; }
+    .clause { margin-top: 20px; }
+    .clause-title { font-weight: bold; }
+    .signature-block { margin-top: 40px; display: flex; justify-content: space-between; }
+    .signature-box { width: 45%; text-align: center; }
+    .section { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+<h1>Partnership Deed</h1>
+
+<p>
+  This Deed of Partnership is executed on this <strong>{{ execution_date }}</strong> at <strong>{{ jurisdiction }}</strong> by and between:
+</p>
+
+<p>
+  1. <strong>{{ partner1.full_name }}</strong>, Son of {{ partner1.father_name }}, Age {{ partner1.age }},
+  residing at {{ partner1.address }} — hereinafter referred to as "Partner No. 1"
+</p>
+
+<p>
+  AND
+</p>
+
+<p>
+  2. <strong>{{ partner2.full_name }}</strong>, Son of {{ partner2.father_name }}, Age {{ partner2.age }},
+  residing at {{ partner2.address }} — hereinafter referred to as "Partner No. 2"
+</p>
+
+<p>
+  The parties agree to form a partnership in accordance with the Indian Partnership Act, 1932 under the following terms and conditions:
+</p>
+
+<div class="clause">
+  <div class="clause-title">1. Name of the Firm:</div>
+  The name of the partnership firm shall be <strong>{{ firm_name }}</strong>.
+</div>
+
+<div class="clause">
+  <div class="clause-title">2. Nature of Business:</div>
+  {{ business_type }}.
+</div>
+
+<div class="clause">
+  <div class="clause-title">3. Commencement and Duration:</div>
+  The partnership shall commence on <strong>{{ start_date }}</strong> and shall continue as "Partnership At Will."
+</div>
+
+<div class="clause">
+  <div class="clause-title">4. Office and Area of Operation:</div>
+  The business shall operate from <strong>{{ business_address }}</strong> and shall cover the area of <strong>{{ area_of_operation }}</strong>.
+</div>
+
+<div class="clause">
+  <div class="clause-title">5. Capital Contribution:</div>
+  {{ capital_contribution }}
+</div>
+
+<div class="clause">
+  <div class="clause-title">6. Profit and Loss Sharing:</div>
+  {{ profit_sharing }}
+</div>
+
+<div class="clause">
+  <div class="clause-title">7. Active Partners:</div>
+  Both partners shall work as active partners and manage day-to-day operations.
+</div>
+
+<div class="clause">
+  <div class="clause-title">8. Accounting:</div>
+  The books of accounts shall be maintained and closed on 31st March each year.
+</div>
+
+<div class="clause">
+  <div class="clause-title">9. Bank Accounts:</div>
+  Firm accounts shall be operated jointly or individually as agreed.
+</div>
+
+<div class="clause">
+  <div class="clause-title">10. Borrowings:</div>
+  Written consent from both partners is required for any borrowings.
+</div>
+
+<div class="clause">
+  <div class="clause-title">11. Authority to Sign:</div>
+  Agreements with third parties shall be signed by both partners.
+</div>
+
+<div class="clause">
+  <div class="clause-title">12. Duties of Partners:</div>
+  {{ duties }}
+</div>
+
+<div class="clause">
+  <div class="clause-title">13. Restrictions:</div>
+  Partners shall not engage in competing businesses or bind the firm without consent.
+</div>
+
+<div class="clause">
+  <div class="clause-title">14. Admission of New Partner:</div>
+  New partners may be admitted with mutual consent.
+</div>
+
+<div class="clause">
+  <div class="clause-title">15. Death or Retirement:</div>
+  Nominees may continue in place of a deceased/retired partner.
+</div>
+
+<div class="clause">
+  <div class="clause-title">16. Dissolution:</div>
+  Partnership may be dissolved by mutual agreement with one month notice.
+</div>
+
+<div class="clause">
+  <div class="clause-title">17. Arbitration:</div>
+  Disputes shall be resolved through arbitration under Indian law.
+</div>
+
+<div class="clause">
+  <div class="clause-title">18. Applicable Law:</div>
+  The Indian Partnership Act, 1932 shall apply.
+</div>
+
+<p>
+  This deed is executed and signed by both partners on <strong>{{ execution_date }}</strong> at <strong>{{ jurisdiction }}</strong>.
+</p>
+
+<div class="signature-block">
+  <div class="signature-box">
+    ___________________________<br>
+    {{ partner1.full_name }}<br>
+    Partner No. 1
+  </div>
+  <div class="signature-box">
+    ___________________________<br>
+    {{ partner2.full_name }}<br>
+    Partner No. 2
+  </div>
+</div>
+
+</body>
+</html>
