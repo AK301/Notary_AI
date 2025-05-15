@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Legal Document Generator</title>
+  <title>Document Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,9 +13,6 @@
     }
     h2 {
       text-align: center;
-    }
-    label {
-      font-weight: bold;
     }
     input, textarea, select {
       width: 100%;
@@ -42,10 +39,10 @@
 </head>
 <body>
 
-  <h2>Generate Legal Document (.docx)</h2>
+  <h2>Generate Legal Document</h2>
 
   <form id="documentForm">
-    <label>Select Document Type:</label>
+    <label>Document Type:</label>
     <select id="docType" name="doc_type" required>
       <option value="deed">Partnership Deed</option>
       <option value="rent">Rent Agreement</option>
@@ -55,11 +52,17 @@
 
     <button type="submit">Generate Document</button>
     <button type="button" onclick="suggestClause('duties')">💬 Suggest Duties</button>
+    <button type="button" onclick="goToDashboard()">⬅ Back to Dashboard</button>
   </form>
 
   <p id="status"></p>
 
   <script>
+    const tokenFromUrl = new URLSearchParams(window.location.search).get("user_token");
+    if (tokenFromUrl) {
+      localStorage.setItem("token", tokenFromUrl);
+    }
+
     const form = document.getElementById('documentForm');
     const formFields = document.getElementById('formFields');
     const status = document.getElementById('status');
@@ -67,26 +70,35 @@
 
     const templates = {
       deed: `
-        <label>Execution Date:</label>
-        <input name="execution_date" required>
-
-        <label>Jurisdiction:</label>
-        <input name="jurisdiction" required>
-
         <label>Firm Name:</label>
         <input name="firm_name" required>
 
         <label>Business Type:</label>
         <input name="business_type" required>
 
-        <label>Start Date:</label>
-        <input name="start_date" required>
+        <label>Partner 1 Name:</label>
+        <input name="partner1.name" required>
 
-        <label>Business Address:</label>
-        <input name="business_address" required>
+        <label>Partner 1 Father's Name:</label>
+        <input name="partner1.father_name" required>
 
-        <label>Area of Operation:</label>
-        <input name="area_of_operation" required>
+        <label>Partner 1 Age:</label>
+        <input name="partner1.age" required>
+
+        <label>Partner 1 Address:</label>
+        <input name="partner1.address" required>
+
+        <label>Partner 2 Name:</label>
+        <input name="partner2.name" required>
+
+        <label>Partner 2 Father's Name:</label>
+        <input name="partner2.father_name" required>
+
+        <label>Partner 2 Age:</label>
+        <input name="partner2.age" required>
+
+        <label>Partner 2 Address:</label>
+        <input name="partner2.address" required>
 
         <label>Capital Contribution:</label>
         <input name="capital_contribution" required>
@@ -94,49 +106,66 @@
         <label>Profit Sharing:</label>
         <input name="profit_sharing" required>
 
+        <label>Jurisdiction:</label>
+        <input name="jurisdiction" required>
+
+        <label>Execution Date:</label>
+        <input name="execution_date" type="date" required>
+
+        <label>Place of Business:</label>
+        <input name="business_address" required>
+
+        <label>Area of Operation:</label>
+        <input name="area_of_operation" required>
+
+        <label>Start Date:</label>
+        <input name="start_date" type="date" required>
+
         <label>Duties:</label>
         <textarea name="duties" id="duties" rows="4" required></textarea>
-
-        <h3>Partner 1</h3>
-        <input name="partner1.full_name" placeholder="Full Name" required>
-        <input name="partner1.father_name" placeholder="Father's Name" required>
-        <input name="partner1.age" placeholder="Age" required>
-        <input name="partner1.address" placeholder="Address" required>
-
-        <h3>Partner 2</h3>
-        <input name="partner2.full_name" placeholder="Full Name" required>
-        <input name="partner2.father_name" placeholder="Father's Name" required>
-        <input name="partner2.age" placeholder="Age" required>
-        <input name="partner2.address" placeholder="Address" required>
       `,
       rent: `
+        <label>Tenant Company Name:</label>
+        <input name="tenant.company_name" required>
+
+        <label>Tenant Director Name:</label>
+        <input name="tenant.director_name" required>
+
+        <label>Landlord Name:</label>
+        <input name="landlord.name" required>
+
+        <label>Landlord Father's Name:</label>
+        <input name="landlord.father_name" required>
+
+        <label>Landlord Address:</label>
+        <input name="landlord.address" required>
+
+        <label>Property Number:</label>
+        <input name="property.number" required>
+
+        <label>Property Address:</label>
+        <input name="property.address" required>
+
+        <label>Rent Amount:</label>
+        <input name="rent.amount" required>
+
+        <label>Rent Amount (in words):</label>
+        <input name="rent.amount_words" required>
+
+        <label>Rent Duration:</label>
+        <input name="rent.duration" required>
+
+        <label>Rent Start Date:</label>
+        <input name="rent.start_date" type="date" required>
+
+        <label>Agreement Place:</label>
+        <input name="place" required>
+
         <label>Agreement Date:</label>
-        <input name="agreement_date" required>
-
-        <h3>Landlord</h3>
-        <input name="landlord.name" placeholder="Full Name" required>
-        <input name="landlord.father_name" placeholder="Father's Name" required>
-        <input name="landlord.address" placeholder="Address" required>
-
-        <h3>Tenant</h3>
-        <input name="tenant.company_name" placeholder="Company Name" required>
-        <input name="tenant.director_name" placeholder="Director Name" required>
-
-        <h3>Property</h3>
-        <input name="property.number" placeholder="Property Number" required>
-        <input name="property.address" placeholder="Full Address" required>
-
-        <h3>Rent Details</h3>
-        <input name="rent.amount" placeholder="Rent Amount" required>
-        <input name="rent.amount_words" placeholder="Rent Amount in Words" required>
-        <input name="rent.start_date" placeholder="Start Date" required>
-        <input name="rent.duration" placeholder="Duration (e.g. 11 months)" required>
+        <input name="agreement_date" type="date" required>
 
         <label>Duties:</label>
         <textarea name="duties" id="duties" rows="4" required></textarea>
-
-        <label>Place:</label>
-        <input name="place" placeholder="e.g. Ratnagiri" required>
       `
     };
 
@@ -148,12 +177,11 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      status.style.color = "blue";
       status.textContent = "⏳ Generating document...";
+      status.style.color = "blue";
 
       const formData = new FormData(form);
       const data = {};
-
       for (const [key, value] of formData.entries()) {
         const keys = key.split(".");
         if (keys.length === 2) {
@@ -164,18 +192,18 @@
         }
       }
 
+      data.user_token = localStorage.getItem("token");
       const endpoint = docType.value === "deed" ? "/generate-docx/" : "/generate-rent-agreement/";
 
       try {
-        const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+        const res = await fetch(`http://127.0.0.1:8000${endpoint}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
         });
 
-        if (!response.ok) throw new Error("Failed to generate document");
-
-        const blob = await response.blob();
+        if (!res.ok) throw new Error("Failed to generate document");
+        const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -184,16 +212,15 @@
         a.click();
         a.remove();
 
+        status.textContent = "✅ Document downloaded!";
         status.style.color = "green";
-        status.textContent = "✅ Document downloaded successfully!";
       } catch (err) {
-        status.style.color = "red";
         status.textContent = "❌ Error: " + err.message;
+        status.style.color = "red";
       }
     });
 
     async function suggestClause(fieldName) {
-    try {
       const response = await fetch("http://127.0.0.1:8000/suggest-clause/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -201,19 +228,21 @@
       });
 
       const data = await response.json();
-      if (!data.suggestion) {
-        console.error("🛑 GPT returned error:", data.error);
-        alert("Failed to generate suggestion. Please check backend.");
-        return;
+      if (data.suggestion) {
+        document.querySelector(`[name="${fieldName}"]`).value = data.suggestion;
+      } else {
+        alert("GPT error: " + (data.error || "No suggestion received"));
       }
-
-      console.log("🧠 GPT Suggestion:", data.suggestion);
-      document.querySelector(`[name="${fieldName}"]`).value = data.suggestion;
-    } catch (err) {
-      console.error("💥 JS Fetch Error:", err);
-      alert("Something went wrong while contacting the server.");
     }
-  }
+
+    function goToDashboard() {
+      const token = localStorage.getItem("token");
+      if (token) {
+        window.location.href = "dashboard.html";
+      } else {
+        alert("Token missing. Please login again.");
+      }
+    }
   </script>
 
 </body>
