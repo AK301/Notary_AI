@@ -60,6 +60,7 @@
     <thead>
       <tr>
         <th>Document</th>
+        <th>Type</th>
         <th>Date</th>
         <th>Download</th>
       </tr>
@@ -84,6 +85,12 @@
       window.location.href = "login.html";
     }
 
+    function inferDocumentType(name) {
+      if (name.toLowerCase().includes("rent")) return "Rent Agreement";
+      if (name.toLowerCase().includes("partnership")) return "Partnership Deed";
+      return "Other";
+    }
+
     async function loadDrafts() {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -102,14 +109,16 @@
         tbody.innerHTML = "";
 
         if (drafts.length === 0) {
-          tbody.innerHTML = "<tr><td colspan='3'>No drafts found.</td></tr>";
+          tbody.innerHTML = "<tr><td colspan='4'>No drafts found.</td></tr>";
           return;
         }
 
         drafts.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(d => {
+          const type = inferDocumentType(d.name);
           const row = `
             <tr>
               <td>${d.name}</td>
+              <td>${type}</td>
               <td>${d.date}</td>
               <td><a href="${d.url}" target="_blank">Download</a></td>
             </tr>`;

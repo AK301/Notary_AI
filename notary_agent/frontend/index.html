@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
-  <title>Document Generator</title>
+  <title>Generate Legal Document</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,16 +12,21 @@
       padding: 30px;
       background: #f9f9f9;
     }
+
     h2 {
       text-align: center;
     }
-    input, textarea, select {
+
+    input,
+    textarea,
+    select {
       width: 100%;
       margin-bottom: 15px;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+
     button {
       padding: 10px 25px;
       font-size: 16px;
@@ -31,172 +37,139 @@
       border-radius: 5px;
       margin-right: 10px;
     }
+
     #status {
       margin-top: 15px;
       font-weight: bold;
     }
+
+    .form-section {
+      display: none;
+    }
   </style>
 </head>
-<body>
 
+<body>
   <h2>Generate Legal Document</h2>
 
-  <form id="documentForm">
-    <label>Document Type:</label>
-    <select id="docType" name="doc_type" required>
-      <option value="deed">Partnership Deed</option>
-      <option value="rent">Rent Agreement</option>
-    </select>
+  <label for="draftType">Select Draft Type:</label>
+  <select id="draftType" onchange="switchForm(this.value)">
+    <option value="partnership">Partnership Deed</option>
+    <option value="rent">Rent Agreement</option>
+  </select>
 
-    <div id="formFields"></div>
+  <form id="documentForm">
+    <!-- Partnership Form -->
+    <div id="partnershipForm" class="form-section">
+      <label>Firm Name:</label><input name="firm_name" required>
+      <label>Business Type:</label><input name="business_type" required>
+
+      <label>Partner 1 Full Name:</label><input name="partner1.full_name" required>
+      <label>Partner 1 Father's Name:</label><input name="partner1.father_name" required>
+      <label>Partner 1 Age:</label><input name="partner1.age" required>
+      <label>Partner 1 Address:</label><input name="partner1.address" required>
+
+      <label>Partner 2 Full Name:</label><input name="partner2.full_name" required>
+      <label>Partner 2 Father's Name:</label><input name="partner2.father_name" required>
+      <label>Partner 2 Age:</label><input name="partner2.age" required>
+      <label>Partner 2 Address:</label><input name="partner2.address" required>
+
+      <label>Capital Contribution:</label><input name="capital_contribution" required>
+      <label>Profit Sharing:</label><input name="profit_sharing" required>
+      <label>Duties:</label><textarea name="duties" rows="4" required></textarea>
+
+      <label>Execution Date:</label><input type="date" name="execution_date">
+      <label>Jurisdiction:</label><input name="jurisdiction">
+      <label>Business Address:</label><input name="business_address">
+      <label>Area of Operation:</label><input name="area_of_operation">
+      <label>Start Date:</label><input type="date" name="start_date">
+    </div>
+
+    <!-- Rent Agreement Form -->
+    <div id="rentForm" class="form-section">
+      <label>Landlord Name:</label><input name="landlord_name" required>
+      <label>Landlord Address:</label><input name="landlord_address" required>
+      <label>Tenant Name:</label><input name="tenant_name" required>
+      <label>Tenant Address:</label><input name="tenant_address" required>
+      <label>Property Address:</label><input name="property_address" required>
+      <label>Rent Amount (₹):</label><input name="rent_amount" required>
+      <label>Deposit Amount (₹):</label><input name="deposit_amount" required>
+      <label>Rent Start Date:</label><input type="date" name="rent_start_date" required>
+      <label>Rent End Date:</label><input type="date" name="rent_end_date" required>
+    </div>
 
     <button type="submit">Generate Document</button>
-    <button type="button" onclick="suggestClause('duties')">💬 Suggest Duties</button>
-    <button type="button" onclick="goToDashboard()">⬅ Back to Dashboard</button>
+    <p id="status"></p>
   </form>
-
-  <p id="status"></p>
 
   <script>
     const tokenFromUrl = new URLSearchParams(window.location.search).get("user_token");
-    if (tokenFromUrl) {
-      localStorage.setItem("token", tokenFromUrl);
-    }
+    if (tokenFromUrl) localStorage.setItem("token", tokenFromUrl);
 
     const form = document.getElementById('documentForm');
-    const formFields = document.getElementById('formFields');
     const status = document.getElementById('status');
-    const docType = document.getElementById('docType');
+    const formSections = document.querySelectorAll('.form-section');
 
-    const templates = {
-      deed: `
-        <label>Firm Name:</label>
-        <input name="firm_name" required>
 
-        <label>Business Type:</label>
-        <input name="business_type" required>
 
-        <label>Partner 1 Name:</label>
-        <input name="partner1.name" required>
 
-        <label>Partner 1 Father's Name:</label>
-        <input name="partner1.father_name" required>
+    function switchForm(draftType) {
+      formSections.forEach(section => {
+        // Hide and remove "required" attributes from all inputs in hidden sections
+        section.style.display = 'none';
+        section.querySelectorAll('input, textarea, select').forEach(input => {
+          input.removeAttribute('required');
+        });
+      });
 
-        <label>Partner 1 Age:</label>
-        <input name="partner1.age" required>
+      const activeForm = document.getElementById(draftType + 'Form');
+      activeForm.style.display = 'block';
 
-        <label>Partner 1 Address:</label>
-        <input name="partner1.address" required>
+      // Re-apply required only for visible inputs
+      activeForm.querySelectorAll('input, textarea, select').forEach(input => {
+        if (input.dataset.originalRequired === "true") {
+          input.setAttribute('required', 'required');
+        }
+      });
+    }
 
-        <label>Partner 2 Name:</label>
-        <input name="partner2.name" required>
+    // Store original "required" status using data attributes
+    window.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('input, textarea, select').forEach(input => {
+        if (input.hasAttribute('required')) {
+          input.dataset.originalRequired = "true";
+        }
+      });
 
-        <label>Partner 2 Father's Name:</label>
-        <input name="partner2.father_name" required>
-
-        <label>Partner 2 Age:</label>
-        <input name="partner2.age" required>
-
-        <label>Partner 2 Address:</label>
-        <input name="partner2.address" required>
-
-        <label>Capital Contribution:</label>
-        <input name="capital_contribution" required>
-
-        <label>Profit Sharing:</label>
-        <input name="profit_sharing" required>
-
-        <label>Jurisdiction:</label>
-        <input name="jurisdiction" required>
-
-        <label>Execution Date:</label>
-        <input name="execution_date" type="date" required>
-
-        <label>Place of Business:</label>
-        <input name="business_address" required>
-
-        <label>Area of Operation:</label>
-        <input name="area_of_operation" required>
-
-        <label>Start Date:</label>
-        <input name="start_date" type="date" required>
-
-        <label>Duties:</label>
-        <textarea name="duties" id="duties" rows="4" required></textarea>
-      `,
-      rent: `
-        <label>Tenant Company Name:</label>
-        <input name="tenant.company_name" required>
-
-        <label>Tenant Director Name:</label>
-        <input name="tenant.director_name" required>
-
-        <label>Landlord Name:</label>
-        <input name="landlord.name" required>
-
-        <label>Landlord Father's Name:</label>
-        <input name="landlord.father_name" required>
-
-        <label>Landlord Address:</label>
-        <input name="landlord.address" required>
-
-        <label>Property Number:</label>
-        <input name="property.number" required>
-
-        <label>Property Address:</label>
-        <input name="property.address" required>
-
-        <label>Rent Amount:</label>
-        <input name="rent.amount" required>
-
-        <label>Rent Amount (in words):</label>
-        <input name="rent.amount_words" required>
-
-        <label>Rent Duration:</label>
-        <input name="rent.duration" required>
-
-        <label>Rent Start Date:</label>
-        <input name="rent.start_date" type="date" required>
-
-        <label>Agreement Place:</label>
-        <input name="place" required>
-
-        <label>Agreement Date:</label>
-        <input name="agreement_date" type="date" required>
-
-        <label>Duties:</label>
-        <textarea name="duties" id="duties" rows="4" required></textarea>
-      `
-    };
-
-    docType.addEventListener('change', () => {
-      formFields.innerHTML = templates[docType.value];
+      switchForm("partnership"); // Default view
     });
 
-    docType.dispatchEvent(new Event('change'));
+
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       status.textContent = "⏳ Generating document...";
       status.style.color = "blue";
 
-      const formData = new FormData(form);
-      const data = {};
-      for (const [key, value] of formData.entries()) {
-        const keys = key.split(".");
-        if (keys.length === 2) {
-          data[keys[0]] = data[keys[0]] || {};
-          data[keys[0]][keys[1]] = value;
-        } else {
-          data[key] = value;
-        }
-      }
+      const draftType = document.getElementById("draftType").value;
+      const activeForm = document.getElementById(draftType + "Form");
+      const inputs = activeForm.querySelectorAll("input, textarea");
 
+      const data = {};
+      inputs.forEach(input => {
+        const key = input.name;
+        if (input.type === "number") {
+          data[key] = parseInt(input.value);
+        } else {
+          data[key] = input.value;
+        }
+      });
       data.user_token = localStorage.getItem("token");
-      const endpoint = docType.value === "deed" ? "/generate-docx/" : "/generate-rent-agreement/";
+      console.log(data);
+      const endpoint = `http://127.0.0.1:8000/${draftType}/generate`;
 
       try {
-        const res = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+        const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
@@ -207,7 +180,7 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${docType.value}_document.docx`;
+        a.download = `${draftType}_document.docx`;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -219,31 +192,7 @@
         status.style.color = "red";
       }
     });
-
-    async function suggestClause(fieldName) {
-      const response = await fetch("http://127.0.0.1:8000/suggest-clause/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ field: fieldName, context: docType.value })
-      });
-
-      const data = await response.json();
-      if (data.suggestion) {
-        document.querySelector(`[name="${fieldName}"]`).value = data.suggestion;
-      } else {
-        alert("GPT error: " + (data.error || "No suggestion received"));
-      }
-    }
-
-    function goToDashboard() {
-      const token = localStorage.getItem("token");
-      if (token) {
-        window.location.href = "dashboard.html";
-      } else {
-        alert("Token missing. Please login again.");
-      }
-    }
   </script>
-
 </body>
+
 </html>
