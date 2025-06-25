@@ -5,7 +5,7 @@ from backend.db import get_db
 from backend.drafts.partnership.generator import generate_partnership_docx
 from backend.drafts.partnership.schema import PartnershipDeedRequest
 from backend.models import Draft, User
-from utils.email_sender import send_email_with_attachment  # ✅ import
+from utils.email_sender import send_email_with_attachment
 import datetime
 import os
 
@@ -18,11 +18,10 @@ async def generate_partnership_draft(
 ):
     try:
         # ✅ Generate document
-        docx_path = generate_partnership_docx(
-            data, filename_prefix=data.firm_name.replace(" ", "_")
-        )
+        filename_prefix = f"{data.firm_name.replace(' ', '_')}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+        docx_path = generate_partnership_docx(data, filename_prefix=filename_prefix)
 
-        # ✅ Save to DB if user exists
+        # ✅ Save draft to DB if user exists
         user = db.query(User).filter(User.email == data.user_token).first()
         if user:
             draft = Draft(
@@ -34,7 +33,7 @@ async def generate_partnership_draft(
             db.add(draft)
             db.commit()
 
-        # ✅ Send email with attachment
+        # ✅ Send document via email
         send_email_with_attachment(
             to_email=data.user_token,
             subject="Your Partnership Deed Document",
@@ -49,7 +48,9 @@ async def generate_partnership_draft(
         )
 
     except Exception as e:
-        print("❌ Document generation failed:", str(e))
+        import traceback
+
+        print("❌ Document generation failed:\n", traceback.format_exc())
         raise HTTPException(
             status_code=500, detail=f"Document generation failed: {str(e)}"
         )

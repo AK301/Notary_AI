@@ -7,15 +7,15 @@ class PartnershipDeedRequest(BaseModel):
     firm_name: str
     business_type: str
 
-    partner1_full_name: str = Field(alias="partner1.full_name")
-    partner1_father_name: str = Field(alias="partner1.father_name")
-    partner1_age: int = Field(alias="partner1.age")
-    partner1_address: str = Field(alias="partner1.address")
+    partner1_full_name: str = Field(alias="partner1_full_name")
+    partner1_father_name: str = Field(alias="partner1_father_name")
+    partner1_age: str = Field(alias="partner1_age")
+    partner1_address: str = Field(alias="partner1_address")
 
-    partner2_full_name: str = Field(alias="partner2.full_name")
-    partner2_father_name: str = Field(alias="partner2.father_name")
-    partner2_age: int = Field(alias="partner2.age")
-    partner2_address: str = Field(alias="partner2.address")
+    partner2_full_name: str = Field(alias="partner2_full_name")
+    partner2_father_name: str = Field(alias="partner2_father_name")
+    partner2_age: str = Field(alias="partner2_age")
+    partner2_address: str = Field(alias="partner2_address")
 
     capital_contribution: str
     profit_sharing: str
