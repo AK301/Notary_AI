@@ -1,61 +1,99 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Notary Dashboard</title>
+  <title>Notary AI • Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 900px;
-      margin: auto;
-      padding: 30px;
-      background: #f9f9f9;
+    :root{
+      --blue-1:#1e40af;  /* dark royal */
+      --blue-2:#3b82f6;  /* main accent */
+      --blue-3:#60a5fa;  /* pastel tint */
+      --bg-light:#f4f7ff;
+      --text:#222;
     }
 
-    h2 {
-      text-align: center;
+    /* ---------- Layout ---------- */
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Poppins',sans-serif;
+      background:var(--bg-light);
+      color:var(--text);
+      max-width:1000px;
+      margin:50px auto;
+      padding:0 24px;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
+    /* ---------- Top bar ---------- */
+    .topbar{
+      display:flex;justify-content:space-between;align-items:center;
+      background:linear-gradient(135deg,var(--blue-1),var(--blue-2));
+      padding:20px 28px;border-radius:14px;color:#fff;
+      box-shadow:0 6px 14px rgba(0,0,0,.08);
     }
+    .topbar h2{font-size:1.6rem;font-weight:600}
 
-    th,
-    td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
+    /* ---------- Buttons ---------- */
+    .btn{
+      padding:11px 28px;
+      border:none;border-radius:8px;
+      background:#fff;color:var(--blue-1);font-weight:600;
+      cursor:pointer;transition:.25s;
+      box-shadow:0 4px 10px rgba(0,0,0,.08);
     }
+    .btn:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(0,0,0,.12)}
 
-    button {
-      padding: 8px 15px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
+    .btn.accent{
+      background:var(--blue-2);color:#fff;
     }
+    .btn.accent:hover{background:var(--blue-1)}
 
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    /* ---------- Table ---------- */
+    table{
+      width:100%;border-collapse:collapse;margin-top:32px;
+      background:#fff;border-radius:12px;overflow:hidden;
+      box-shadow:0 4px 14px rgba(0,0,0,.06);
+    }
+    thead{background:var(--blue-1);color:#fff}
+    th,td{padding:16px 20px;text-align:left;font-size:.95rem}
+    tbody tr:nth-child(even){background:#f8faff}
+    tbody tr:hover{background:var(--blue-3);color:#fff;transition:.25s}
+
+    a.download{
+      color:var(--blue-1);font-weight:600;text-decoration:none;
+      transition:.2s;
+    }
+    tbody tr:hover a.download{color:#fff}
+
+    /* ---------- Empty state ---------- */
+    .empty{padding:40px;color:#666;text-align:center}
+
+    @media(max-width:620px){
+      thead{display:none}
+      tbody td{display:block;padding:12px 18px}
+      tbody tr{margin-bottom:18px;border:1px solid #e3e8ff;border-radius:10px;overflow:hidden}
+      tbody td::before{
+        content:attr(data-label);
+        font-weight:600;display:block;margin-bottom:6px;color:var(--blue-1)
+      }
     }
   </style>
 </head>
-
 <body>
 
+  <!-- Top bar -->
   <div class="topbar">
     <h2>Welcome, Notary</h2>
-    <button onclick="logout()">Logout</button>
+    <button class="btn accent" onclick="logout()">Logout</button>
   </div>
 
-  <button onclick="goToNewDraft()">➕ New Draft</button>
+  <!-- New draft -->
+  <div style="margin-top:28px">
+    <button class="btn" onclick="goToNewDraft()">➕ New Draft</button>
+  </div>
 
+  <!-- Drafts table -->
   <table>
     <thead>
       <tr>
@@ -65,74 +103,56 @@
         <th>Download</th>
       </tr>
     </thead>
-    <tbody id="drafts">
-      <!-- Drafts will load here -->
-    </tbody>
+    <tbody id="drafts"><tr><td class="empty" colspan="4">Loading drafts…</td></tr></tbody>
   </table>
 
   <script>
-    function goToNewDraft() {
-      const token = localStorage.getItem("token");
-      if (token) {
-        window.location.href = `index.html?user_token=${token}`;
-      } else {
-        alert("You are not logged in.");
+    function goToNewDraft(){
+      const token=localStorage.getItem('token');
+      token?window.location.href=`index.html?user_token=${token}`:alert('You are not logged in.');
+    }
+
+    function logout(){
+      localStorage.removeItem('token');
+      window.location.href='login.html';
+    }
+
+    function inferType(name){
+      name=name.toLowerCase();
+      if(name.includes('rent'))return'Rent Agreement';
+      if(name.includes('partnership'))return'Partnership Deed';
+      return'Other';
+    }
+
+    async function loadDrafts(){
+      const token=localStorage.getItem('token');
+      if(!token){alert('Please login again.');window.location.href='login.html';return;}
+
+      try{
+        const res=await fetch(`http://127.0.0.1:8000/drafts?token=${token}`);
+        if(!res.ok)throw new Error('Failed to load');
+        const drafts=await res.json();
+
+        const tbody=document.getElementById('drafts');tbody.innerHTML='';
+        if(drafts.length===0){tbody.innerHTML="<tr><td class='empty' colspan='4'>No drafts yet.</td></tr>";return;}
+
+        drafts
+          .sort((a,b)=>new Date(b.date)-new Date(a.date))
+          .forEach(d=>{
+            const row=document.createElement('tr');
+            row.innerHTML=`<td data-label="Document">${d.name}</td>
+              <td data-label="Type">${inferType(d.name)}</td>
+              <td data-label="Date">${d.date}</td>
+              <td data-label="Download"><a class="download" href="${d.url}" target="_blank">Download</a></td>`;
+            tbody.appendChild(row);
+          });
+      }catch(err){
+        console.error(err);
+        alert('Could not load drafts.');
       }
     }
 
-    function logout() {
-      localStorage.removeItem("token");
-      window.location.href = "login.html";
-    }
-
-    function inferDocumentType(name) {
-      if (name.toLowerCase().includes("rent")) return "Rent Agreement";
-      if (name.toLowerCase().includes("partnership")) return "Partnership Deed";
-      return "Other";
-    }
-
-    async function loadDrafts() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("No login token found. Please login again.");
-        window.location.href = "login.html";
-        return;
-      }
-
-      try {
-        const res = await fetch(`http://127.0.0.1:8000/drafts?token=${token}`);
-        if (!res.ok) throw new Error("Failed to load drafts");
-        const drafts = await res.json();
-        console.log("Loaded drafts:", drafts);
-
-        const tbody = document.getElementById("drafts");
-        tbody.innerHTML = "";
-
-        if (drafts.length === 0) {
-          tbody.innerHTML = "<tr><td colspan='4'>No drafts found.</td></tr>";
-          return;
-        }
-
-        drafts.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(d => {
-          const type = inferDocumentType(d.name);
-          const row = `
-            <tr>
-              <td>${d.name}</td>
-              <td>${type}</td>
-              <td>${d.date}</td>
-              <td><a href="${d.url}" target="_blank">Download</a></td>
-            </tr>`;
-          tbody.insertAdjacentHTML("beforeend", row);
-        });
-      } catch (err) {
-        console.error("❌ Error loading drafts:", err);
-        alert("Could not load drafts.");
-      }
-    }
-
-    window.onload = loadDrafts;
+    window.onload=loadDrafts;
   </script>
-
 </body>
-
 </html>
