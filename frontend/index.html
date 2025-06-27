@@ -145,7 +145,6 @@
       <option value="rent">Rent Agreement</option>
       <option value="hakkasod_ai">Hakkasod Patra (AI)</option>
       <option value="hakkasod_ai_docx">Hakkasod Patra (AI + Word)</option>
-
     </select>
 
     <form id="documentForm">
@@ -201,13 +200,6 @@
   </div>
 
   <script>
-    const tokenFromUrl = new URLSearchParams(location.search).get('user_token');
-    if (tokenFromUrl) localStorage.setItem('token', tokenFromUrl);
-    if (draftTypeSelect.value === "hakkasod_ai") {
-      endpoint = "http://127.0.0.1:8000/hakkasod/generate-ai-docx";
-      useBlob = true;
-    }
-
     const draftTypeSelect = document.getElementById('draftType');
     const sections = document.querySelectorAll('.form-section');
 
@@ -224,14 +216,23 @@
       });
     }
 
+    // Store default required fields
+    document.querySelectorAll('input,textarea').forEach(el => {
+      if (el.required) el.dataset.req = "1";
+    });
+
     draftTypeSelect.addEventListener('change', () => {
       switchSection(draftTypeSelect.value);
       updateRequired();
     });
 
-    document.querySelectorAll('input,textarea').forEach(el => {
-      if (el.required) el.dataset.req = "1";
-    });
+    // Auto-select draft type from URL if ?draft=... is passed
+    const draftFromURL = new URLSearchParams(location.search).get('draft');
+    if (draftFromURL) {
+      draftTypeSelect.value = draftFromURL;
+      switchSection(draftFromURL);
+      updateRequired();
+    }
 
     const form = document.getElementById('documentForm');
     const status = document.getElementById('status');
@@ -273,7 +274,6 @@
           document.body.appendChild(a);
           a.click();
           a.remove();
-
           status.textContent = '✅ Document downloaded!';
           status.style.color = 'green';
         } else {
