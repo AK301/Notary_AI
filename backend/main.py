@@ -3,9 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.auth.routes import router as auth_router
 from backend.drafts.partnership.routes import router as partnership_router  # ✅
 from backend.drafts.rent.routes import router as rent_router
-
+import os
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+app.mount(
+    "/frontend",
+    StaticFiles(directory=os.path.join(os.path.dirname(__file__), "../frontend")),
+    name="frontend",
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,4 +29,4 @@ app.include_router(rent_router)
 
 @app.get("/")
 def root():
-    return {"message": "NotaryAI backend is running"}
+    return {"message": "Astha backend is running"}
