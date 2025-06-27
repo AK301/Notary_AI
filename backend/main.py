@@ -5,6 +5,8 @@ from backend.drafts.partnership.routes import router as partnership_router  # âœ
 from backend.drafts.rent.routes import router as rent_router
 import os
 from fastapi.staticfiles import StaticFiles
+from backend.drafts.hakkasod.routes import router as hakkasod_router
+
 
 app = FastAPI()
 app.mount(
@@ -25,6 +27,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(partnership_router)
 app.include_router(rent_router)
+app.include_router(hakkasod_router)
 
 
 @app.get("/")

@@ -1,8 +1,10 @@
 fastapi
 uvicorn
-openai
 python-dotenv
 pdfkit
 jinja2
 passlib[bcrypt]
+openai>=1.0.0
+
+
 
